@@ -1,0 +1,23 @@
+# Simulação (VCS / Verdi)
+csrc/
+simv*
+*.daidir/
+novas*
+AN.DB/
+ucli.key
+verdi*
+DVEfiles/
+.vlogan*
+*.fsdb
+*.vcd
+*.log
+work/
+work.lib++/
+
+# Bibliotecas locais
+alib-52/
+*.db.alib
+
+# SO
+.DS_Store
+Thumbs.db

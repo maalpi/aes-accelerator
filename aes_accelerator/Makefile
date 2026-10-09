@@ -1,41 +1,24 @@
-# ==============================================================================
-# Makefile — Acelerador AES (RTL Design Track) — Semana 1
-# Fluxo mínimo em um comando:  make
-# ==============================================================================
-
 RTL_DIR = rtl
-SIM_DIR = sim
+TB_DIR  = tb
 
-PKG_FILES = $(RTL_DIR)/aes_pkg.sv
+RTL_FILES = $(RTL_DIR)/smoke_top.sv
+TB_FILES  = $(TB_DIR)/tb_smoke_top.sv
 
-RTL_FILES = \
-	$(RTL_DIR)/cdc_sync.sv \
-	$(RTL_DIR)/reset_controller.sv \
-	$(RTL_DIR)/clock_gen.sv \
-	$(RTL_DIR)/spi_slave.sv \
-	$(RTL_DIR)/data_subsystem.sv \
-	$(RTL_DIR)/aes_core.sv \
-	$(RTL_DIR)/aes_top.sv
-
-TB_FILES = \
-	$(SIM_DIR)/sram_model.sv \
-	$(SIM_DIR)/tb_aes_top.sv
-
-TOP = tb_aes_top
+TOP = tb_smoke_top
 TIMESCALE = 1ns/1ps
 
-VLOGAN_FLAGS = -full64 -sverilog -kdb +lint=all
+VLOGAN_FLAGS = -full64 -sverilog -kdb +lint=all -timescale=$(TIMESCALE)
 VCS_FLAGS    = -full64 -timescale=$(TIMESCALE) -debug_access+all -kdb
 
 all: run
 
 # Sintaxe + lint (RTL e testbench)
 syntax:
-	vlogan $(VLOGAN_FLAGS) $(PKG_FILES) $(RTL_FILES) $(TB_FILES)
+	vlogan $(VLOGAN_FLAGS) $(RTL_FILES) $(TB_FILES)
 
 # Lint apenas do RTL
 lint:
-	vlogan $(VLOGAN_FLAGS) $(PKG_FILES) $(RTL_FILES)
+	vlogan $(VLOGAN_FLAGS) $(RTL_FILES)
 
 # Compilação / elaboração
 compile: syntax

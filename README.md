@@ -15,15 +15,17 @@ aes_accelerator/
 │   └── reports/
 │       ├── template_semanal.md
 │       └── semana_01.md
-├── rtl/                      # Esqueletos (portas); lógica vem nas semanas 3–6
-│   ├── aes_pkg.sv  aes_top.sv  aes_core.sv  spi_slave.sv
-│   ├── data_subsystem.sv  reset_controller.sv  clock_gen.sv  cdc_sync.sv
-└── sim/
-    ├── sram_model.sv         # Modelo de memória
-    └── tb_aes_top.sv         # Smoke test
+├── rtl/                      # RTL mínimo da Semana 1 (lógica do AES nas semanas 3–6)
+│   └── smoke_top.sv          # Módulo mínimo de smoke test (clk, rst, dados)
+├── tb/                       # Testbench
+│   └── tb_smoke_top.sv       # Testbench com autocheck do ambiente Synopsys
+├── synth/                    # Síntese lógica (Design Compiler) — semana 7
+├── formal/                   # Equivalência formal (Formality) — semanas 8–9
+├── upf/                      # Intenção de potência (UPF) — semanas 10–11
+└── scripts/                  # Scripts auxiliares (Tcl, shell)
 ```
 
-As pastas `synth/`, `formal/` e `upf/` serão criadas nas semanas 7, 8 e 10, respectivamente.
+As pastas `synth/`, `formal/`, `upf/` e `scripts/` estão vazias (`.gitkeep`) e serão preenchidas nas semanas indicadas.
 
 ## Uso
 

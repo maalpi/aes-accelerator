@@ -11,6 +11,8 @@ DVEfiles/
 *.fsdb
 *.vcd
 *.log
+!docs/reports/*.log
+!**/docs/reports/*.log
 work/
 work.lib++/
 

@@ -1,178 +1,132 @@
 # Backlog do Projeto — Acelerador AES com Interface SPI e Baixo Consumo
 
 **Trilha:** RTL Design Track  
-**Duração:** 15 Semanas  
-**Ritmo:** 1 Entregável por Semana com Sabatina e Relatório Semanal  
-**Branch Principal:** `main` | **Branches de Trabalho:** `wXX-[funcionalidade]`  
+**Especificação de Referência:** Block Guide – MiniSoC AES (v1.0.0)  
+**Duração:** 13 Semanas (Cronograma revisado em 27/10/2026 — encerramento em 29/01/2027, recesso de 21/12/2026 a 03/01/2027)  
+**Ritmo:** 1 Entregável por Semana com Sabatina e Relatório Semanal (`docs/reports/semana_XX.md`)  
 
 ---
 
 ## Visão Geral das Fases
 
-```mermaid
-gantt
-    title Cronograma de Execução do IP AES (15 Semanas)
-    dateFormat  X
-    axisFormat Sem %s
-    section Fase 1: Arquitetura
-    Semana 1 - Kick-off & Ambiente    :active, 1, 2
-    Semana 2 - Arquitetura & CDC       : 2, 3
-    section Fase 2: RTL
-    Semana 3 - SPI Slave & Registradores : 3, 4
-    Semana 4 - Reset, Clock & CDC       : 4, 5
-    Semana 5 - Datapath AES & Memória   : 5, 6
-    Semana 6 - Integração & Handover DV : 6, 7
-    section Fase 3: Síntese
-    Semana 7 - Síntese Lógica & Baseline : 7, 8
-    section Fase 4: Formal
-    Semana 8 - Setup Formality          : 8, 9
-    Semana 9 - Fechamento Formal         : 9, 10
-    section Fase 5: UPF
-    Semana 10 - Arquitetura de Potência : 10, 11
-    Semana 11 - Intenção de Potência UPF: 11, 12
-    section Fase 6: Baixo Consumo
-    Semana 12 - Clock Gating & Síntese LP: 12, 13
-    Semana 13 - Power Gating & Retenção : 13, 14
-    Semana 14 - Comparação com Baseline : 14, 15
-    section Fase 7: Encerramento
-    Semana 15 - Documentação & Apresentação: 15, 16
-```
+| Fase | Semanas | Período | Foco |
+|:----:|:-------:|:-------:|:-----|
+| **1. Kick-off e ambiente** | 1 | concluída | Estudo, repositório e fluxo mínimo |
+| **2. Desenvolvimento do RTL** | 2–7 | 30/10 a 04/12 | Datapath AES, SPI, PLL mock, AES engine, memória e integração (RTL v1.0) |
+| **3. Síntese inicial** | 8 | 11/12 | SDC, síntese e baseline de área, timing e potência |
+| **4. Verificação formal de equivalência** | 9 | 18/12 | Equivalência RTL × netlist com o Formality |
+| **Recesso** | — | 21/12 a 03/01 | Sem entregas |
+| **5. Fechamento funcional** | 10 | 08/01 | Modos restantes, correções e RTL v1.1 |
+| **6. Intenção de potência e baixo consumo** | 11–12 | 15/01 a 22/01 | Arquitetura de energia, UPF, power gating e clock gating (RTL v2.0) |
+| **7. Síntese low power e encerramento** | 13 | 29/01 | Comparação com o baseline e apresentação final |
 
 ---
 
 ## Detalhamento Semana a Semana
 
-### Fase 1: Especificação e Arquitetura (Semanas 1–2)
+### Fase 1: Kick-off e Ambiente (Semana 1)
 
-#### Semana 1 — Kick-off, Estudo e Ambiente
-- [x] Apresentação do projeto e alinhamento de escopo.
-- [x] Estudo do algoritmo AES (FIPS-197) e protocolo SPI (CPOL, CPHA).
-- [x] Estruturação da árvore de pastas e arquivos base (`rtl`, `sim`, `synth`, `formal`, `upf`, `docs`, `scripts`).
-- [x] Criação do backlog inicial do projeto e template de relatório semanal.
-- [x] Ambiente de execução com exemplo mínimo (compilação, lint e simulação smoke test).
-- **Entregável:** Repositório estruturado, backlog inicial, smoke test rodando e relatório `docs/reports/semana_01.md`.
-- **Critério de Aceite:** Repositório clonável em ambiente limpo e execução com um único comando (`make`).
-
-#### Semana 2 — Especificação Microarquitetural e Mapa de Registradores
-- [ ] Especificação detalhada da microarquitetura dos submódulos.
-- [ ] Mapeamento dos registradores de controle e status (CSRs) via interface SPI.
-- [ ] Definição do protocolo de interface de dados com a memória (barramento SRAM/FIFO).
-- [ ] Estratégia de cruze de domínios de clock (CDC) entre `spi_sclk` e `clk_core`.
-- **Entregável:** Documento de microarquitetura (`docs/architecture.md`) completo e revisado pelo verificador parceiro.
-- **Critério de Aceite:** Interfaces aprovadas sem ambiguidades para a equipe de DV.
+#### Semana 1 — Kick-off, Estudo e Ambiente (Concluída)
+- [x] Apresentação do projeto e da especificação funcional.
+- [x] Estudo do algoritmo AES (FIPS-197) e do protocolo SPI (modos de operação, polaridade e fase de clock).
+- [x] Preparação do ambiente inicial: repositório, scripts de execução e configuração das ferramentas (VCS, lint).
+- [x] Criação do backlog inicial do projeto.
+- **Entregável:** Repositório estruturado, backlog inicial, ambiente executando exemplo mínimo e relatório de estudo sobre AES e SPI (`docs/reports/semana_01/semana_01.md`).
+- **Critério de Aceite:** Repositório clonável em ambiente limpo e fluxo mínimo executado com um único comando (`make`).
 
 ---
 
-### Fase 2: Desenvolvimento do RTL (Semanas 3–6)
+### Fase 2: Desenvolvimento do RTL (Semanas 2–7)
 
-#### Semana 3 — Interface SPI Slave e Bloco CSR
-- [ ] Implementação da FSM receptora/transmissora da SPI (Modo 0, shift registers MOSI/MISO).
-- [ ] Implementação do banco de registradores de configuração, chaves e controle de operação.
-- [ ] Testbench dedicado do módulo SPI e validação unitária.
-- **Entregável:** Código RTL sintetizável do `spi_slave.sv` e relatório `docs/reports/semana_03.md`.
-- **Critério de Aceite:** Testes de escrita e leitura de registradores via SPI passando com 100% de acerto.
+#### Semana 2 — Desafio: SubBytes e ShiftRows (Entrega 30/10)
+- [x] Implementar `minisoc_aes_sbox` (entrada 8 bits, saída 8 bits, puramente combinacional, Figura 7 da FIPS-197).
+- [x] Implementar `minisoc_aes_sub_bytes` (estado de 128 bits, 16 instâncias de `minisoc_aes_sbox`).
+- [x] Implementar `minisoc_aes_shift_rows` (estado de 128 bits, apenas reordenação de fios, convenção do Block Guide `[127:120]` = byte 0).
+- [x] Testbench autoverificável (`tb/tb_minisoc_aes_w02.sv`): 256 entradas da S-box e estados do Apêndice B da FIPS-197 (rodadas 1 a 10).
+- [x] Leitura das seções 1 a 3 e 8 do Block Guide, registrando dúvidas e ambiguidades.
+- **Entregável:** RTL de `minisoc_aes_sbox`, `minisoc_aes_sub_bytes` e `minisoc_aes_shift_rows`, testbench autoverificável e relatório curto (`docs/reports/semana_02.md`).
+- **Critério de Aceite:** Testbench executado por um único comando (`make`), com PASS nas 256 entradas da S-box e nos vetores do Apêndice B; lint sem erros.
 
-#### Semana 4 — Gerador de Clock, Reset e CDC
-- [ ] Implementação do `reset_controller.sv` com sincronizador assíncrono / liberação síncrona.
-- [ ] Modelo comportamental e divisor/selecionador de clock (`clock_gen.sv` / PLL model).
-- [ ] Implementação e validação de células sincronizadoras de CDC (`cdc_sync.sv`).
-- **Entregável:** RTL de infraestrutura de clock/reset e sincronizadores validados em simulação.
-- **Critério de Aceite:** Ausência de glitches de reset e sinais sincronizados corretamente entre domínios.
+#### Semana 3 — Microarquitetura v1.0 e Transformações de Rodada (Entrega 06/11)
+- [ ] Elaborar documento de microarquitetura v1.0 e apresentar ao verificador parceiro.
+- [ ] Implementar transformações de rodada restantes (diretas e inversas: `MixColumns`, `InvSubBytes`, `InvShiftRows`, `InvMixColumns`).
+- [ ] Testbench autoverificável validando transformações diretas e inversas.
+- **Entregável:** Microarquitetura v1.0 + transformações de rodada + relatório `docs/reports/semana_03.md`.
 
-#### Semana 5 — Datapath AES e Subsistema de Dados
-- [ ] Implementação dos blocos fundamentais do AES (SubBytes / S-Box, ShiftRows, MixColumns, AddRoundKey).
-- [ ] FSM de controle das 10 rodadas e expansão de chave *on-the-fly* ou pré-armazenada.
-- [ ] Lógica de interface de memória / buffer de dados (`data_subsystem.sv`).
-- **Entregável:** RTL do `aes_core.sv` e `data_subsystem.sv` validados individualmente com vetores NIST.
-- **Critério de Aceite:** Criptografia de bloco teste (NIST SP 800-38A) com vetor de teste batendo o padrão ouro.
+#### Semana 4 — Expansão de Chave e Datapath AES-128 (Entrega 13/11)
+- [ ] Implementar `minisoc_aes_key_exp` (expansão de chave AES-128).
+- [ ] Implementar `minisoc_aes_dp` (datapath completo AES-128 em cifragem e decriptação).
+- [ ] Testbench com os vetores da FIPS-197 (Apêndice C.1 e Apêndice B) nos dois sentidos.
+- **Entregável:** RTL de `minisoc_aes_key_exp` e `minisoc_aes_dp`, testbench com vetores do padrão e relatório `docs/reports/semana_04.md`.
+- **Critério de Aceite:** Cifragem e decriptação conferem com os vetores de referência; lint sem erros.
 
-#### Semana 6 — Integração do Sistema de Topo e Entrega DV (Milestone RTL v1.0)
-- [ ] Interconexão de todos os blocos no topo `aes_top.sv`.
-- [ ] Simulação de ponta a ponta: envio de chave e dados por SPI/memória, disparo de criptografia e leitura do resultado.
-- [ ] Checagem de lint estrito (`+lint=all`) sem violações pendentes.
-- [ ] Geração da tag `w06-rtl-v1.0` e abertura do canal de issues com o verificador parceiro.
-- **Entregável:** Tag Git `w06-rtl-v1.0`, repositório limpo e relatório de integração `docs/reports/semana_06.md`.
-- **Critério de Aceite:** Simulação de ponta a ponta aprovada e entrega formalizada ao parceiro de DV.
+#### Semana 5 — SPI Front-End e PLL Mock (Entrega 20/11)
+- [ ] Implementar `minisoc_spi` (seção 5 do Block Guide): SPI Mode 0, MSB-first, frame de 40 bits, sincronização de toggle para domínio `clk` e banco de registradores (seção 6).
+- [ ] Implementar `minisoc_pll_mock` (seção 4.1): referência de 2 GHz, enable, `PLL_DIV_SEL` (`/1`, `/2`, `/4`, `/8`) e `locked`.
+- [ ] Testbench dirigido: escrita e leitura de todos os registradores via SPI e habilitação do PLL até `PLL_LOCKED = 1`.
+- **Entregável:** RTL de `minisoc_spi` e `minisoc_pll_mock`, testbench e relatório de lint (`docs/reports/semana_05.md`).
 
----
+#### Semana 6 — AES Engine e Memória Compartilhada (Entrega 27/11)
+- [ ] Implementar `minisoc_memory` (seção 7): 1024 × 32 bits, single-port síncrona, sem reset, ownership por `MEM_SEL_AES`.
+- [ ] Implementar `minisoc_aes_top` (seção 8): modos ECB, CBC e CTR (cifragem e decriptação), detecção de configuração inválida (`ERROR`).
+- [ ] Testbench de bloco com a memória (1, 2 e 256 blocos) comparado com modelo de referência em software.
+- **Entregável:** RTL de `minisoc_memory` e `minisoc_aes_top`, testbench de bloco, vetores de referência e relatório `docs/reports/semana_06.md`.
 
-### Fase 3: Síntese Inicial (Semana 7)
-
-#### Semana 7 — Síntese Lógica e Baseline
-- [ ] Elaboração do arquivo de restrições de temporização (`aes_top.sdc`) com múltiplos clocks.
-- [ ] Script de síntese lógica com Synopsys Design Compiler (`synth.tcl`) na biblioteca alvo SAED32.
-- [ ] Análise de relatórios de área, timing (setup/hold slack) e consumo de potência inicial.
-- **Entregável:** Netlist sintetizada inicial, relatórios de síntese e relatório `docs/reports/semana_07.md`.
-- **Critério de Aceite:** Design compilado sem violações graves de timing (slack positivo) e baseline registrado.
-
----
-
-### Fase 4: Verificação Formal de Equivalência (Semanas 8–9)
-
-#### Semana 8 — Configuração e Execução do Synopsys Formality
-- [ ] Criação do script de equivalência formal (`formality.tcl`) comparando RTL contra Netlist.
-- [ ] Mapeamento de pontos de comparação (registers, ports, black-boxes).
-- **Entregável:** Script funcional do Formality e primeiro relatório de equivalência.
-- **Critério de Aceite:** Mapeamento de 100% dos pontos de comparação sem falhas estruturais.
-
-#### Semana 9 — Fechamento e Comprovação de Equivalência Formal
-- [ ] Resolução de divergências de otimização de síntese (retiming, clock gating, hierarquia).
-- [ ] Geração do relatório oficial de verificação formal comprovando status `Equivalent`.
-- **Entregável:** Relatório de fechamento formal com status `SUCCESS: Equivalent`.
-- **Critério de Aceite:** 100% de equivalência comprovada matematicamente entre RTL e Netlist.
+#### Semana 7 — Integração do Top-Level e RTL v1.0 (Entrega 04/12)
+- [ ] Implementar `minisoc_top`: conexão dos quatro blocos e exposição exata das interfaces CLK, RESET, SPI e MEMORY DATA (seção 3).
+- [ ] Sequência de reset (seção 4.2), teste de ponta a ponta (14 passos da seção 9) e análise de CDC.
+- [ ] Entrega da tag `rtl-v1.0` ao verificador parceiro.
+- **Entregável:** Top-level integrado, teste de ponta a ponta, relatórios de lint e CDC, tag `rtl-v1.0` e relatório `docs/reports/semana_07.md`.
 
 ---
 
-### Fase 5: Intenção de Potência (Semanas 10–11)
+### Fase 3: Síntese Inicial (Semana 8)
 
-#### Semana 10 — Arquitetura de Energia e Domínios de Potência
-- [ ] Definição dos domínios de potência (Always-On Domain, AES Datapath Power Domain).
-- [ ] Especificação dos estados de energia (Active, Sleep, Power-Gated).
-- [ ] Definição de estratégia de isolamento de sinais e retenção de chave/estado.
-- **Entregável:** Documento de arquitetura de potência e tabela de estados (Power State Table - PST).
-- **Critério de Aceite:** Arquitetura de potência alinhada com as capacidades do PDK SAED32.
-
-#### Semana 11 — Modelagem em UPF (IEEE 1801)
-- [ ] Criação do arquivo `aes_top.upf` com declaração de supply ports, supply nets, power switches.
-- [ ] Configuração de estratégias de isolamento (`set_isolation`) e retenção (`set_retention`).
-- [ ] Checagem de sintaxe e consistência de UPF pré-síntese.
-- **Entregável:** Arquivo UPF funcional e relatório de validação sintática.
-- **Critério de Aceite:** Validação de consistência do UPF aprovada sem erros.
+#### Semana 8 — Síntese Inicial e Baseline (Entrega 11/12)
+- [ ] Escrita das restrições de timing (SDC) para `clk`, `sys_clk`, `spi_sclk` e `mem_clk`.
+- [ ] Síntese lógica do RTL v1.0 com o PDK fornecido e análise dos relatórios de área, timing e potência.
+- **Entregável:** Scripts de síntese, SDC, netlist e relatório de baseline (`docs/reports/semana_08.md`).
 
 ---
 
-### Fase 6: Técnicas de Baixo Consumo (Semanas 12–14)
+### Fase 4: Verificação Formal de Equivalência (Semana 9)
 
-#### Semana 12 — Clock Gating e Síntese Ciente de Potência
-- [ ] Habilitação de inserção automática de clock gating pelo Design Compiler (`compile_ultra -gate_clock`).
-- [ ] Inserção de clock gating estrutural em blocos ociosos do datapath.
-- [ ] Análise da redução de potência dinâmica.
-- **Entregável:** Netlist com clock gating e relatórios comparativos de potência.
-- **Critério de Aceite:** Redução comprovada na potência dinâmica em relação ao baseline da Semana 7.
-
-#### Semana 13 — Power Gating, Isolamento e Retenção
-- [ ] Síntese lógica orientada a UPF (LP synthesis).
-- [ ] Inserção de células de corte de energia (Power Switches), isoladores e registradores de retenção.
-- [ ] Simulação funcional do ciclo de Power-Down, Retenção e Power-Up (Wake-up).
-- **Entregável:** Netlist com domínios chaveados e relatório funcional do ciclo de potência.
-- **Critério de Aceite:** Circuito desliga o domínio AES e retoma com dados preservados nos registradores de retenção.
-
-#### Semana 14 — Análise Comparativa e Avaliação de Trade-offs
-- [ ] Comparação rigorosa das métricas finais vs. Baseline (Semana 7):
-  - Consumo Estático (Leakage);
-  - Consumo Dinâmico (Switching);
-  - Área total de silício (overhead de switches e células LP);
-  - Frequência máxima de operação.
-- **Entregável:** Tabela consolidada de métricas e relatório de tradeoffs `docs/reports/semana_14.md`.
-- **Critério de Aceite:** Justificativa quantitativa dos ganhos de eficiência energética obtidos.
+#### Semana 9 — Verificação Formal de Equivalência (Entrega 18/12)
+- [ ] Fluxo no Formality comparando RTL v1.0 (referência) e netlist sintetizada (implementação) com arquivo SVF.
+- [ ] Exercício de diagnóstico com alteração intencional.
+- **Entregável:** Scripts do Formality e relatório de equivalência (`docs/reports/semana_09.md`).
 
 ---
 
-### Fase 7: Encerramento (Semana 15)
+### Fase 5: Fechamento Funcional (Semana 10)
 
-#### Semana 15 — Apresentação Técnica e Artigo Final
-- [ ] Consolidação de toda a documentação técnica do IP.
-- [ ] Elaboração de slides para apresentação final perante banca/instrutor.
-- [ ] Redação do artigo/relatório executivo final descrevendo desafios, métricas e resultados.
-- **Entregável:** Relatório final consolidado, slides de apresentação e tag de release final `v1.0-final`.
-- **Critério de Aceite:** Defesa oral aprovada com êxito na sabatina do projeto.
+#### Semana 10 — Fechamento Funcional e RTL v1.1 (Entrega 08/01)
+- [ ] Implementação dos modos PCBC, CFB e OFB (seção 8.2).
+- [ ] Correção dos defeitos reportados pelo verificador parceiro, nova síntese e nova equivalência formal.
+- [ ] Entrega da tag `rtl-v1.1` ao verificador parceiro.
+- **Entregável:** Tag `rtl-v1.1`, testes dos seis modos, netlist atualizada e relatório `docs/reports/semana_10.md`.
+
+---
+
+### Fase 6: Intenção de Potência e Baixo Consumo (Semanas 11–12)
+
+#### Semana 11 — Arquitetura de Energia e UPF (Entrega 15/01)
+- [ ] Definição dos modos de operação, domínios de potência, tabela de estados (PST), isolamento e retenção.
+- [ ] Escrita do arquivo UPF, verificação estática e simulação power-aware.
+- **Entregável:** Documento de arquitetura de energia, arquivo UPF, relatórios de verificação estática e simulação power-aware (`docs/reports/semana_11.md`).
+
+#### Semana 12 — Técnicas de Baixo Consumo e RTL v2.0 (Entrega 22/01)
+- [ ] Controlador de energia e sequência de power gating integrados ao banco de registradores.
+- [ ] Aplicação de clock gating e isolamento de operandos; atualização do testbench.
+- [ ] Entrega da tag `rtl-v2.0` ao verificador parceiro.
+- **Entregável:** Tag `rtl-v2.0`, testes atualizados e relatórios (`docs/reports/semana_12.md`).
+
+---
+
+### Fase 7: Síntese Low Power e Encerramento (Semana 13)
+
+#### Semana 13 — Síntese Low Power e Encerramento (Entrega 29/01)
+- [ ] Síntese do RTL v2.0 com UPF e inserção automática de clock gating.
+- [ ] Comparação com o baseline da Semana 8 e verificação de equivalência no Formality com UPF.
+- [ ] Consolidação da documentação, release final e apresentação final.
+- **Entregável:** Relatório comparativo baseline × low power, relatório de equivalência, release final e apresentação (`docs/reports/semana_13.md`).

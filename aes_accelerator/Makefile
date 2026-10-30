@@ -1,10 +1,12 @@
 RTL_DIR = rtl
 TB_DIR  = tb
 
-RTL_FILES = $(RTL_DIR)/smoke_top.sv
-TB_FILES  = $(TB_DIR)/tb_smoke_top.sv
+RTL_FILES = $(RTL_DIR)/minisoc_aes/minisoc_aes_sbox.sv \
+            $(RTL_DIR)/minisoc_aes/minisoc_aes_sub_bytes.sv \
+            $(RTL_DIR)/minisoc_aes/minisoc_aes_shift_rows.sv
+TB_FILES  = $(TB_DIR)/tb_minisoc_aes_w02.sv
 
-TOP = tb_smoke_top
+TOP = tb_minisoc_aes_w02
 TIMESCALE = 1ns/1ps
 
 VLOGAN_FLAGS = -full64 -sverilog -kdb +lint=all -timescale=$(TIMESCALE)
